@@ -28926,7 +28926,7 @@ function upload(params) {
   return new Promise((resolve) => {
     s3.upload(params, (err, data) => {
       if (err) core.error(err);
-      core.info(`uploaded - ${params.Key}`);
+      core.info(`uploaded - ${data.Key}`);
       core.info(`located - ${data.Location}`);
       resolve(data.Location);
     });
@@ -28941,13 +28941,20 @@ function run() {
       const bucketPath = slash(
         path.join(destinationDir, slash(path.relative(sourceDir, p.path)))
       );
+
+      core.info('acl value:' + (ACL || 'null'));
+
       const params = {
         Bucket: BUCKET,
-        ACL: ACL || 'public-read',
         Body: fileStream,
         Key: bucketPath,
         ContentType: lookup(p.path) || 'text/plain',
       };
+
+      if(ACL) {
+        params.ACL = ACL;
+      }
+
       return upload(params);
     })
   );
